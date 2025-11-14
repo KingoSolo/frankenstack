@@ -1,0 +1,209 @@
+# ============================================
+# FRANKENSTACK PROJECT SPECIFICATION
+# This tells Kiro what we're building
+# ============================================
+
+project_info:
+  name: "FrankenStack"
+  tagline: "Stitch incompatible APIs together with AI"
+  hackathon: "Kiroween 2024"
+  category: "Frankenstein"  # Because we're stitching things together!
+
+# ============================================
+# WHY THIS PROJECT EXISTS
+# ============================================
+problem:
+  description: |
+    Developers waste hours writing "glue code" to connect different API protocols.
+    A REST API can't directly talk to a GraphQL API, which can't talk to gRPC, etc.
+    
+  pain_points:
+    - "Each protocol needs different code libraries"
+    - "Converting data formats is tedious and error-prone"
+    - "Testing integrations requires running multiple services"
+    - "No visual way to see how data flows between systems"
+
+solution:
+  description: |
+    FrankenStack auto-generates adapters that translate between protocols.
+    Developers describe what they want in plain English, and Kiro builds the glue code.
+    
+  key_features:
+    - "Connect 5 different protocols in one app"
+    - "Visual lab interface showing data flow in real-time"
+    - "AI-generated adapters from natural language specs"
+    - "Spooky Frankenstein lab theme (lightning effects, stitches)"
+
+# ============================================
+# THE 5 PROTOCOLS WE'RE CONNECTING
+# ============================================
+protocols:
+  - name: "REST"
+    description: "Traditional web APIs (JSON over HTTP)"
+    example_use: "Stripe payment webhooks"
+    difficulty: "Easy - you know this"
+    
+  - name: "GraphQL"
+    description: "Query language for APIs (flexible data fetching)"
+    example_use: "Shopify storefront data"
+    difficulty: "Medium - we'll learn together"
+    
+  - name: "gRPC"
+    description: "High-performance RPC framework (Protocol Buffers)"
+    example_use: "Google Maps microservices"
+    difficulty: "Hard - Kiro will help us"
+    
+  - name: "SOAP"
+    description: "XML-based protocol (legacy enterprise systems)"
+    example_use: "Old banking APIs"
+    difficulty: "Hard - very old-school"
+    
+  - name: "WebSocket"
+    description: "Persistent two-way connections (real-time data)"
+    example_use: "Live chat or notifications"
+    difficulty: "Medium - fun to work with"
+
+# ============================================
+# TECH STACK (What technologies we'll use)
+# ============================================
+tech_stack:
+  frontend:
+    framework: "Next.js 14"           # You know React, Next.js is React++"
+    styling: "Tailwind CSS"           # Easy styling with utility classes
+    visualization: "React Flow"       # Drag-and-drop node visualization
+    state: "Zustand"                  # Simple state management
+    
+  backend:
+    runtime: "Node.js"                # JavaScript on the server
+    framework: "Express"              # Simple web server
+    api_layer: "tRPC"                 # Type-safe API calls (we'll learn this)
+    
+  database:
+    type: "PostgreSQL"                # To store adapter configs
+    orm: "Drizzle"                    # Easy database queries
+    hosting: "Supabase"               # Free PostgreSQL + auth
+
+# ============================================
+# HOW WE'LL USE KIRO (Important for judges!)
+# ============================================
+kiro_features:
+  vibe_coding:
+    description: "Generate code from natural language"
+    examples:
+      - "Create a REST adapter that converts Stripe webhooks to GraphQL mutations"
+      - "Add a visualization node for gRPC with green lightning animation"
+      
+  specs:
+    description: "Write detailed specifications for each adapter"
+    location: ".kiro/specs/"
+    files:
+      - "rest-adapter.yaml"
+      - "graphql-adapter.yaml"
+      - "grpc-adapter.yaml"
+      - "soap-adapter.yaml"
+      - "websocket-adapter.yaml"
+      
+  agent_hooks:
+    description: "Automate repetitive tasks"
+    examples:
+      - "Command: 'kiro new-adapter REST stripe' → generates full boilerplate"
+      - "Auto-format all adapter code to match our style guide"
+      
+  steering_docs:
+    description: "Guide Kiro's code generation style"
+    topics:
+      - "How to structure adapters (consistent patterns)"
+      - "Error handling best practices"
+      - "Testing strategy for each protocol"
+      
+  mcp_servers:
+    description: "Custom Kiro plugins for each protocol"
+    count: 5
+    purpose: "Let Kiro understand and work with each protocol natively"
+
+# ============================================
+# SPOOKY THEME (Costume Contest bonus points!)
+# ============================================
+ui_theme:
+  aesthetic: "Frankenstein's Laboratory"
+  color_palette:
+    primary: "#0a2f1f"      # Dark green (lab walls)
+    accent: "#39ff14"       # Electric lime (lightning)
+    background: "#0d0d0d"   # Almost black
+    text: "#e0e0e0"         # Light gray
+    
+  animations:
+    - "Lightning bolts when data transfers between protocols"
+    - "Bubbling beaker loading states"
+    - "Stitches connecting protocol nodes"
+    - "Flickering lights on successful API calls"
+    
+  sound_effects:
+    - "Thunder crack when adapter activates"
+    - "Electrical hum during data processing"
+    - "Monster roar when all 5 protocols connect"
+
+# ============================================
+# 3-WEEK TIMELINE
+# ============================================
+timeline:
+  week_1:
+    focus: "Foundation + Specs"
+    deliverables:
+      - "All 5 adapter specs written"
+      - "Basic Node.js backend structure"
+      - "Simple React UI mockup"
+      
+  week_2:
+    focus: "Build Core Features"
+    deliverables:
+      - "5 MCP servers functional"
+      - "REST + GraphQL adapters working"
+      - "Real-time visualization with React Flow"
+      
+  week_3:
+    focus: "Polish + Demo"
+    deliverables:
+      - "All 5 protocols connected"
+      - "Spooky UI animations complete"
+      - "3-minute demo video recorded"
+      - "Submission on Devpost"
+```
+
+---
+
+### 🎓 LEARNING CHECK: Do you understand?
+
+Before moving on, answer these questions (just think about them):
+
+1. **What problem does FrankenStack solve?**
+   <details><summary>Answer</summary>It helps developers connect different types of APIs (REST, GraphQL, etc.) without writing tons of "glue code" manually.</details>
+
+2. **Why is it called FrankenStack?**
+   <details><summary>Answer</summary>Like Frankenstein stitched body parts together, we're stitching incompatible protocols together.</details>
+
+3. **What does Kiro do in this project?**
+   <details><summary>Answer</summary>It auto-generates the adapter code based on our specs, instead of us writing everything manually.</details>
+
+4. **Why do we need a `.kiro/specs/` folder?**
+   <details><summary>Answer</summary>It's where we write blueprints that tell Kiro what to build. Also required by hackathon rules!</details>
+
+---
+
+## 🎨 STEP 4: SKETCH THE UI (20 minutes)
+
+You don't need to code anything yet! Just draw/mockup what the app will look like.
+
+### Option A: Paper sketch
+1. Draw 5 boxes (one for each protocol)
+2. Draw arrows connecting them
+3. Label one "REST - Stripe", another "GraphQL - Shopify", etc.
+4. Add lightning bolts on the arrows
+5. Take a photo and save it as `design/ui-sketch.jpg`
+
+### Option B: Use Excalidraw (free online tool)
+1. Go to https://excalidraw.com
+2. Create the same 5-box layout
+3. Export as PNG
+
+I've put the designs in the design folder 
