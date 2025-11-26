@@ -5,6 +5,7 @@ import type { Protocol } from '@/lib/types/protocol';
 import { PROTOCOLS } from '@/lib/types/protocol';
 import { useProtocolStore } from '@/lib/store/protocolStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ConfigurationForm } from '../configuration/ConfigurationForm';
 
 const ALL_PROTOCOLS: Protocol[] = ['REST', 'GraphQL', 'gRPC', 'SOAP', 'WebSocket'];
 
@@ -105,19 +106,24 @@ export function ProtocolSelector() {
               </div>
             </div>
 
-            {/* Next button */}
-            <div className="mt-8 text-center">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-8 py-4 bg-[#39ff14] text-black font-bold text-lg rounded-lg shadow-lg hover:shadow-[0_0_30px_rgba(57,255,20,0.8)] transition-shadow"
-              >
-                Generate Adapter ⚡
-              </motion.button>
-            </div>
+            {/* Handled by form */}
+          
+        <div className="mt-8 text-center">
+        <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-8 py-4 bg-[#39ff14] text-black font-bold text-lg rounded-lg shadow-lg hover:shadow-[0_0_30px_rgba(57,255,20,0.8)] transition-shadow"
+        >
+            Generate Adapter ⚡
+        </motion.button>
+        </div>
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Configuration form (appears after selecting 2) */}
+      {selectedProtocols.length === 2 && (
+        <ConfigurationForm />
+      )}
     </div>
   );
 }
