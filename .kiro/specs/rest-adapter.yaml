@@ -1,0 +1,54 @@
+# REST to GraphQL Adapter Specification
+# This spec guides Kiro in generating REST-to-GraphQL adapter code
+
+adapter:
+  name: "REST to GraphQL Adapter"
+  source_protocol: "REST"
+  target_protocol: "GraphQL"
+  version: "1.0.0"
+
+purpose: |
+  Generate a Node.js adapter that accepts REST API requests (typically webhooks)
+  and transforms them into GraphQL mutations or queries. The adapter should
+  handle authentication, data transformation, error handling, and provide
+  clear logging for debugging.
+
+input:
+  format: "REST/JSON"
+  typical_sources:
+    - "Stripe webhooks"
+    - "Twilio callbacks"
+    - "GitHub webhooks"
+    - "Generic REST APIs"
+  
+  data_characteristics:
+    - "JSON payload in request body"
+    - "HTTP headers for authentication"
+    - "Query parameters for filters/pagination"
+    - "Various HTTP methods (GET, POST, PUT, DELETE)"
+
+output:
+  format: "GraphQL"
+  typical_targets:
+    - "Shopify GraphQL Admin API"
+    - "Hasura GraphQL Engine"
+    - "Custom GraphQL APIs"
+  
+  data_characteristics:
+    - "GraphQL mutation or query string"
+    - "Variables object for parameterization"
+    - "Authentication headers (Bearer token, API key)"
+    - "Response handling and error parsing"
+
+code_structure:
+  required_components:
+    - "Express.js endpoint handler"
+    - "Request body parser and validator"
+    - "Data transformation logic (REST → GraphQL variables)"
+    - "GraphQL client (fetch or apollo-client)"
+    - "Error handling with specific error types"
+    - "Response formatter"
+    - "Optional: Webhook signature verification (Stripe, GitHub, etc.)"
+  
+  code_pattern: |
+```javascript
