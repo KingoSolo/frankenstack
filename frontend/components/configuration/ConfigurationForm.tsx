@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useProtocolStore } from '@/lib/store/protocolStore';
 import { InputMethodToggle } from './InputMethodToggle';
+import { createAdapter } from '@/lib/api';
 
 export function ConfigurationForm() {
   const {
@@ -22,44 +23,47 @@ export function ConfigurationForm() {
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [generatedAdapter, setGeneratedAdapter] = useState<any>(null);
 
-  const handleGenerate = async () => {
+    const handleGenerate = async () => {
     setError(null);
     
     // Validation
     if (inputMethod === 'natural-language' && description.length < 50) {
-      setError('Description must be at least 50 characters');
-      return;
+        setError('Description must be at least 50 characters');
+        return;
     }
     
     if (inputMethod === 'documentation' && (!sourceEndpoint || !targetEndpoint)) {
-      setError('Both endpoints are required');
-      return;
+        setError('Both endpoints are required');
+        return;
     }
 
     // Get full config
     const config = getConfig();
     if (!config) {
-      setError('Please select 2 protocols first');
-      return;
+        setError('Please select 2 protocols first');
+        return;
     }
 
     setIsGenerating(true);
 
     try {
-      // TODO: Call backend API to generate adapter
-      console.log('Generating adapter with config:', config);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      alert('Adapter generated! (Backend integration coming next)');
+        // Call backend API
+        const adapter = await createAdapter(config);
+        console.log('Adapter created:', adapter);
+        
+        setGeneratedAdapter(adapter);
+        
+        // Success message
+        alert(`✅ Adapter saved to database!\n\nID: ${adapter.id}\nProtocols: ${adapter.sourceProtocol} → ${adapter.targetProtocol}`);
     } catch (err) {
-      setError('Failed to generate adapter');
+        console.error('Error:', err);
+        setError('Failed to generate adapter. Make sure backend is running!');
     } finally {
-      setIsGenerating(false);
+        setIsGenerating(false);
     }
-  };
+    };
 
   const isValid = inputMethod === 'natural-language' 
     ? description.length >= 50
