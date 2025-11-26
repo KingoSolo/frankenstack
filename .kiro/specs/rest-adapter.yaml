@@ -52,3 +52,244 @@ code_structure:
   
   code_pattern: |
 ```javascript
+    // Import required libraries
+    const express = require('express');
+    const router = express.Router();
+    
+    // Main adapter function
+    async function restToGraphQLAdapter(restPayload, config) {
+      try {
+        // 1. Validate REST payload
+        validatePayload(restPayload, config.sourceSchema);
+        
+        // 2. Transform REST data to GraphQL variables
+        const graphqlVariables = transformData(restPayload, config.mappings);
+        
+        // 3. Build GraphQL mutation/query
+        const graphqlQuery = buildGraphQLQuery(config.targetOperation, graphqlVariables);
+        
+        // 4. Execute GraphQL request
+        const result = await executeGraphQL(
+          config.targetEndpoint,
+          graphqlQuery,
+          graphqlVariables,
+          config.authentication
+        );
+        
+        // 5. Return formatted response
+        return {
+          success: true,
+          data: result,
+          metadata: {
+            sourceProtocol: 'REST',
+            targetProtocol: 'GraphQL',
+            timestamp: new Date().toISOString()
+          }
+        };
+      } catch (error) {
+        return handleError(error);
+      }
+    }
+    
+    // Helper: Transform REST payload to GraphQL variables
+    function transformData(restPayload, mappings) {
+      const variables = {};
+      
+      for (const [restField, graphqlField] of Object.entries(mappings)) {
+        const value = getNestedValue(restPayload, restField);
+        if (value !== undefined) {
+          variables[graphqlField] = value;
+        }
+      }
+      
+      return variables;
+    }
+    
+    // Helper: Execute GraphQL request
+    async function executeGraphQL(endpoint, query, variables, auth) {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.token}`,
+          ...auth.additionalHeaders
+        },
+        body: JSON.stringify({ query, variables })
+      });
+      
+      const result = await response.json();
+      
+      if (result.errors) {
+        throw new GraphQLError(result.errors);
+      }
+      
+      return result.data;
+    }
+    
+    // Error handling
+    function handleError(error) {
+      return {
+        success: false,
+        error: {
+          type: error.constructor.name,
+          message: error.message,
+          stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        },
+        metadata: {
+          timestamp: new Date().toISOString()
+        }
+      };
+    }
+    
+    module.exports = { restToGraphQLAdapter };
+```
+
+user_configuration:
+  required_fields:
+    - name: "sourceEndpoint"
+      description: "REST API endpoint URL"
+      example: "https://api.stripe.com/v1/webhooks"
+    
+    - name: "targetEndpoint"
+      description: "GraphQL API endpoint URL"
+      example: "https://your-store.myshopify.com/admin/api/2024-01/graphql.json"
+    
+    - name: "description"
+      description: "Natural language description of what to connect"
+      example: "When Stripe payment succeeds, create Shopify order with customer details"
+  
+  optional_fields:
+    - name: "authentication"
+      description: "Auth config for target GraphQL API"
+      default: "Bearer token"
+    
+    - name: "fieldMappings"
+      description: "Custom field mappings from REST to GraphQL"
+      default: "Auto-inferred from description"
+
+generation_instructions:
+  for_kiro: |
+    When generating code for this adapter:
+    
+    1. READ the user's natural language description carefully
+    2. IDENTIFY the source REST API structure from description or example payload
+    3. IDENTIFY the target GraphQL schema structure from description
+    4. GENERATE field mappings that transform REST data to GraphQL variables
+    5. INCLUDE error handling for:
+       - Network failures
+       - Invalid payloads
+       - GraphQL errors
+       - Authentication failures
+    6. ADD helpful comments explaining each transformation step
+    7. USE modern JavaScript (ES6+, async/await)
+    8. ENSURE code is production-ready (not just a demo)
+    9. INCLUDE validation for required fields
+    10. MAKE code readable and maintainable
+  
+  quality_checklist:
+    - "Code is syntactically valid JavaScript"
+    - "All required imports are included"
+    - "Error handling covers edge cases"
+    - "Field mappings are explicit and clear"
+    - "Authentication is properly implemented"
+    - "Code includes helpful comments"
+    - "Functions have clear, single responsibilities"
+
+example_use_case:
+  scenario: "Stripe Payment to Shopify Order"
+  
+  rest_input: |
+    {
+      "type": "payment_intent.succeeded",
+      "data": {
+        "object": {
+          "id": "pi_123",
+          "amount": 5000,
+          "currency": "usd",
+          "customer": {
+            "email": "customer@example.com",
+            "name": "John Doe"
+          },
+          "metadata": {
+            "product_id": "prod_456",
+            "quantity": 2
+          }
+        }
+      }
+    }
+  
+  graphql_output: |
+    mutation CreateOrder($email: String!, $name: String!, $total: Float!, $productId: ID!, $quantity: Int!) {
+      orderCreate(input: {
+        email: $email
+        customer: { firstName: $name }
+        lineItems: [{ variantId: $productId, quantity: $quantity }]
+        totalPrice: $total
+      }) {
+        order {
+          id
+          totalPrice
+        }
+      }
+    }
+  
+  field_mapping:
+    "data.object.customer.email": "email"
+    "data.object.customer.name": "name"
+    "data.object.amount": "total"
+    "data.object.metadata.product_id": "productId"
+    "data.object.metadata.quantity": "quantity"
+
+testing:
+  test_mode_apis:
+    stripe:
+      endpoint: "https://api.stripe.com/v1"
+      auth: "sk_test_..."
+      test_data: "Use Stripe test credit card numbers"
+    
+    shopify:
+      endpoint: "https://test-store.myshopify.com/admin/api/2024-01/graphql.json"
+      auth: "shpat_test_..."
+      test_data: "Use Shopify development store"
+  
+  validation_steps:
+    - "Send test REST payload to adapter"
+    - "Verify GraphQL query is correctly formed"
+    - "Confirm data transformation is accurate"
+    - "Test error handling with invalid payloads"
+    - "Verify authentication works"
+
+performance:
+  target_metrics:
+    - "Adapter execution time: < 500ms"
+    - "Memory usage: < 50MB"
+    - "Handle rate limiting gracefully"
+    - "Support concurrent requests"
+```
+
+---
+
+## 📋 STEP 2: ASK KIRO TO GENERATE THE ADAPTER (15 minutes)
+
+Now the magic happens! **Open Kiro's chat** and paste this prompt:
+```
+I need you to generate a REST-to-GraphQL adapter based on my spec at .kiro/specs/rest-adapter.yaml
+
+USER CONFIGURATION:
+- Source: Stripe payment webhook (REST/JSON)
+- Target: Shopify GraphQL API
+- Description: "When a Stripe payment_intent.succeeded webhook is received, transform the payment data and create a new order in Shopify. Map the customer email, name, amount, and product details from Stripe to Shopify's orderCreate mutation."
+
+REQUIREMENTS:
+1. Read the spec file to understand the code structure
+2. Generate production-ready JavaScript code (Node.js/Express)
+3. Include all helper functions (transformData, executeGraphQL, etc.)
+4. Add comprehensive error handling
+5. Include field mapping logic for Stripe → Shopify
+6. Add inline comments explaining each step
+7. Make it ready to run (no placeholders)
+
+The generated code should be a complete module that exports a main function:
+`restToGraphQLAdapter(restPayload, config)`
+
+Please generate the code now!
