@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { useProtocolStore } from '@/lib/store/protocolStore';
 import { InputMethodToggle } from './InputMethodToggle';
 import { createAdapter } from '@/lib/api';
+import type { Adapter } from '@/lib/types/adapter';
+import { CodeViewer } from '../code/CodeViewer';
 
 export function ConfigurationForm() {
   const {
@@ -23,8 +25,7 @@ export function ConfigurationForm() {
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [generatedAdapter, setGeneratedAdapter] = useState<any>(null);
-
+  const [generatedAdapter, setGeneratedAdapter] = useState<Adapter | null>(null);
     const handleGenerate = async () => {
     setError(null);
     
@@ -195,6 +196,13 @@ export function ConfigurationForm() {
           )}
         </motion.button>
       </div>
+      {/* Show generated code */}
+      {generatedAdapter && (
+        <CodeViewer 
+          code={generatedAdapter.code}
+          filename={`adapter-${generatedAdapter.sourceProtocol}-to-${generatedAdapter.targetProtocol}.js`}
+        />
+      )}
     </motion.div>
   );
 }
