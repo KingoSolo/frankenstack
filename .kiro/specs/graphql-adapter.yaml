@@ -1,0 +1,303 @@
+# GraphQL to REST Adapter Specification
+# This spec guides Kiro in generating GraphQL-to-REST adapter code
+
+adapter:
+  name: "GraphQL to REST Adapter"
+  source_protocol: "GraphQL"
+  target_protocol: "REST"
+  version: "1.0.0"
+
+purpose: |
+  Generate a Node.js adapter that executes GraphQL queries/mutations
+  and transforms the results into REST API calls. The adapter should
+  handle GraphQL query building, response parsing, data transformation,
+  and REST API integration with proper HTTP methods.
+
+input:
+  format: "GraphQL"
+  typical_sources:
+    - "Shopify GraphQL Admin API"
+    - "Hasura GraphQL Engine"
+    - "GitHub GraphQL API"
+    - "Custom GraphQL endpoints"
+  
+  data_characteristics:
+    - "GraphQL query or mutation string"
+    - "Variables object for parameterization"
+    - "Authentication (Bearer token, API key)"
+    - "Nested response structure"
+
+output:
+  format: "REST/JSON"
+  typical_targets:
+    - "Stripe REST API"
+    - "Twilio REST API"
+    - "Slack REST API"
+    - "Generic REST endpoints"
+  
+  data_characteristics:
+    - "JSON payload in request body"
+    - "HTTP method (GET, POST, PUT, DELETE)"
+    - "Query parameters for GET requests"
+    - "Authentication headers"
+
+code_structure:
+  required_components:
+    - "GraphQL client (fetch or apollo-client)"
+    - "Query executor and response parser"
+    - "Data transformation logic (GraphQL → REST JSON)"
+    - "REST API client with method routing"
+    - "Error handling for GraphQL and REST errors"
+    - "Response formatter"
+    - "Rate limiting handler"
+  
+  code_pattern: |
+```javascript
+    // Import required libraries
+    const fetch = require('node-fetch');
+    
+    // Main adapter function
+    async function graphqlToRestAdapter(graphqlQuery, variables, config) {
+      try {
+        // 1. Execute GraphQL query
+        const graphqlResult = await executeGraphQL(
+          config.sourceEndpoint,
+          graphqlQuery,
+          variables,
+          config.sourceAuth
+        );
+        
+        // 2. Transform GraphQL response to REST payload
+        const restPayload = transformGraphQLToRest(
+          graphqlResult,
+          config.mappings
+        );
+        
+        // 3. Determine REST HTTP method
+        const method = config.restMethod || 'POST';
+        
+        // 4. Execute REST API call
+        const restResult = await executeRest(
+          config.targetEndpoint,
+          method,
+          restPayload,
+          config.targetAuth
+        );
+        
+        // 5. Return formatted response
+        return {
+          success: true,
+          data: restResult,
+          metadata: {
+            sourceProtocol: 'GraphQL',
+            targetProtocol: 'REST',
+            timestamp: new Date().toISOString()
+          }
+        };
+      } catch (error) {
+        return handleError(error);
+      }
+    }
+    
+    // Helper: Execute GraphQL query
+    async function executeGraphQL(endpoint, query, variables, auth) {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.token}`,
+          ...auth.additionalHeaders
+        },
+        body: JSON.stringify({ query, variables })
+      });
+      
+      const result = await response.json();
+      
+      if (result.errors) {
+        throw new GraphQLError(result.errors);
+      }
+      
+      return result.data;
+    }
+    
+    // Helper: Transform GraphQL response to REST payload
+    function transformGraphQLToRest(graphqlData, mappings) {
+      const restPayload = {};
+      
+      for (const [graphqlPath, restField] of Object.entries(mappings)) {
+        const value = getNestedValue(graphqlData, graphqlPath);
+        if (value !== undefined) {
+          setNestedValue(restPayload, restField, value);
+        }
+      }
+      
+      return restPayload;
+    }
+    
+    // Helper: Execute REST API call
+    async function executeRest(endpoint, method, payload, auth) {
+      const options = {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': auth.type === 'bearer' 
+            ? `Bearer ${auth.token}` 
+            : auth.apiKey ? `${auth.apiKey}` : '',
+          ...auth.additionalHeaders
+        }
+      };
+      
+      // Add body for POST/PUT/PATCH
+      if (['POST', 'PUT', 'PATCH'].includes(method)) {
+        options.body = JSON.stringify(payload);
+      }
+      
+      // Add query params for GET
+      if (method === 'GET' && Object.keys(payload).length > 0) {
+        const params = new URLSearchParams(payload);
+        endpoint = `${endpoint}?${params.toString()}`;
+      }
+      
+      const response = await fetch(endpoint, options);
+      
+      if (!response.ok) {
+        throw new RestAPIError(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return await response.json();
+    }
+    
+    // Helper: Get nested value from object
+    function getNestedValue(obj, path) {
+      return path.split('.').reduce((acc, part) => acc?.[part], obj);
+    }
+    
+    // Helper: Set nested value in object
+    function setNestedValue(obj, path, value) {
+      const parts = path.split('.');
+      const last = parts.pop();
+      const target = parts.reduce((acc, part) => {
+        if (!acc[part]) acc[part] = {};
+        return acc[part];
+      }, obj);
+      target[last] = value;
+    }
+    
+    // Error handling
+    function handleError(error) {
+      return {
+        success: false,
+        error: {
+          type: error.constructor.name,
+          message: error.message,
+          stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        },
+        metadata: {
+          timestamp: new Date().toISOString()
+        }
+      };
+    }
+    
+    module.exports = { graphqlToRestAdapter };
+```
+
+user_configuration:
+  required_fields:
+    - name: "sourceEndpoint"
+      description: "GraphQL API endpoint URL"
+      example: "https://your-store.myshopify.com/admin/api/2024-01/graphql.json"
+    
+    - name: "targetEndpoint"
+      description: "REST API endpoint URL"
+      example: "https://api.stripe.com/v1/customers"
+    
+    - name: "graphqlQuery"
+      description: "GraphQL query or mutation to execute"
+      example: "query { products(first: 10) { edges { node { id title } } } }"
+    
+    - name: "restMethod"
+      description: "HTTP method for REST call"
+      options: ["GET", "POST", "PUT", "PATCH", "DELETE"]
+      default: "POST"
+  
+  optional_fields:
+    - name: "fieldMappings"
+      description: "Custom field mappings from GraphQL to REST"
+      example: { "products.edges[0].node.id": "product_id" }
+
+generation_instructions:
+  for_kiro: |
+    When generating code for this adapter:
+    
+    1. READ the user's GraphQL query structure
+    2. IDENTIFY the data shape in the GraphQL response
+    3. IDENTIFY the REST API's expected payload structure
+    4. GENERATE field mappings that transform GraphQL data to REST JSON
+    5. HANDLE nested GraphQL structures (edges, nodes, etc.)
+    6. INCLUDE error handling for:
+       - GraphQL errors
+       - Network failures
+       - REST API errors (4xx, 5xx)
+       - Authentication failures
+    7. IMPLEMENT rate limiting with exponential backoff
+    8. ADD helpful comments explaining transformations
+    9. USE modern JavaScript (ES6+, async/await)
+    10. ENSURE code is production-ready
+
+example_use_case:
+  scenario: "Shopify Products to Stripe Customers"
+  
+  graphql_input: |
+    query GetProducts {
+      products(first: 10) {
+        edges {
+          node {
+            id
+            title
+            variants(first: 1) {
+              edges {
+                node {
+                  price
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  
+  rest_output: |
+    POST https://api.stripe.com/v1/customers
+    {
+      "description": "Product: Awesome T-Shirt",
+      "metadata": {
+        "shopify_product_id": "gid://shopify/Product/123",
+        "price": "29.99"
+      }
+    }
+  
+  field_mapping:
+    "products.edges[0].node.title": "description"
+    "products.edges[0].node.id": "metadata.shopify_product_id"
+    "products.edges[0].node.variants.edges[0].node.price": "metadata.price"
+
+testing:
+  test_mode_apis:
+    shopify:
+      endpoint: "https://test-store.myshopify.com/admin/api/2024-01/graphql.json"
+      auth: "shpat_test_..."
+      test_data: "Use development store with test products"
+    
+    stripe:
+      endpoint: "https://api.stripe.com/v1"
+      auth: "sk_test_..."
+      test_data: "Use test mode API keys"
+
+performance:
+  target_metrics:
+    - "Adapter execution time: < 1000ms"
+    - "Handle rate limiting (429 responses)"
+    - "Retry failed requests with backoff"
+    - "Support batch operations"
+```
+---

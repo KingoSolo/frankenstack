@@ -112,6 +112,107 @@ router.post('/stripe-to-shopify', async (req, res) => {
 });
 
 /**
+ * POST /webhooks/shopify-to-stripe
+ * 
+ * Syncs Shopify products to Stripe customers
+ * Executes a GraphQL query against Shopify and creates customer records in Stripe
+ */
+router.post('/shopify-to-stripe', async (req, res) => {
+  console.log('\n=== Shopify → Stripe Sync Triggered ===');
+  console.log('Timestamp:', new Date().toISOString());
+  
+  try {
+    const { graphqlToRestAdapter } = require('../adapters/graphqlToRestAdapter');
+
+    // GraphQL query to fetch products
+    const graphqlQuery = req.body.query || `
+      query GetProducts($first: Int!) {
+        products(first: $first) {
+          edges {
+            node {
+              id
+              title
+              variants(first: 1) {
+                edges {
+                  node {
+                    price
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const variables = req.body.variables || { first: 10 };
+
+    // Configuration
+    const config = {
+      sourceEndpoint: process.env.SHOPIFY_GRAPHQL_ENDPOINT,
+      sourceAuth: {
+        token: process.env.SHOPIFY_ACCESS_TOKEN
+      },
+      targetEndpoint: process.env.STRIPE_API_ENDPOINT || 'https://api.stripe.com/v1/customers',
+      targetAuth: {
+        token: process.env.STRIPE_SECRET_KEY
+      },
+      restMethod: 'POST',
+      batchMode: true,
+      batchSize: req.body.batchSize || 5,
+      batchDelay: req.body.batchDelay || 1000
+    };
+
+    // Validate environment variables
+    if (!config.sourceAuth.token) {
+      throw new Error('SHOPIFY_ACCESS_TOKEN environment variable is not set');
+    }
+    if (!config.targetAuth.token) {
+      throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+    }
+
+    // Execute the adapter
+    const result = await graphqlToRestAdapter(graphqlQuery, variables, config);
+
+    // Return the result
+    if (result.success) {
+      console.log(`✓ Synced ${result.data.processed} products to Stripe`);
+      
+      res.status(200).json({
+        success: true,
+        message: 'Products synced to Stripe',
+        processed: result.data.processed,
+        results: result.data.results,
+        metadata: result.metadata
+      });
+    } else {
+      console.error('✗ Sync failed');
+      console.error('Error:', result.error);
+      
+      res.status(400).json({
+        success: false,
+        message: 'Failed to sync products',
+        error: result.error,
+        metadata: result.metadata
+      });
+    }
+
+  } catch (error) {
+    console.error('✗ Unexpected error:', error.message);
+    console.error(error.stack);
+    
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: {
+        type: error.name,
+        message: error.message
+      }
+    });
+  }
+});
+
+/**
  * GET /webhooks/health
  * 
  * Health check endpoint for the webhook service
@@ -122,7 +223,8 @@ router.get('/health', (req, res) => {
     service: 'webhook-adapter',
     timestamp: new Date().toISOString(),
     adapters: {
-      'stripe-to-shopify': 'available'
+      'stripe-to-shopify': 'available',
+      'shopify-to-stripe': 'available'
     }
   });
 });
