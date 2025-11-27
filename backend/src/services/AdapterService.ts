@@ -7,29 +7,32 @@ import * as path from 'path';
 export class AdapterService {
   // Generate adapter code using Kiro's template
   private async generateAdapterCode(
-    sourceProtocol: string,
-    targetProtocol: string,
-    config: any
-  ): Promise<string> {
-    // For now, use Kiro's pre-generated template
-    // In a real implementation, this would call Kiro's API dynamically
-    
-    if (sourceProtocol === 'REST' && targetProtocol === 'GraphQL') {
-      const templatePath = path.join(__dirname, '../templates/rest-to-graphql.js');
-      
-      if (fs.existsSync(templatePath)) {
-        let template = fs.readFileSync(templatePath, 'utf-8');
-        
-        // Customize template with user config
-        template = this.customizeTemplate(template, config);
-        
-        return template;
-      }
-    }
-    
-    // Fallback: Generate basic adapter structure
-    return this.generateFallbackAdapter(sourceProtocol, targetProtocol, config);
+  sourceProtocol: string,
+  targetProtocol: string,
+  config: any
+): Promise<string> {
+  // Determine which template to use
+  let templatePath: string | null = null;
+  
+  if (sourceProtocol === 'REST' && targetProtocol === 'GraphQL') {
+    templatePath = path.join(__dirname, '../templates/rest-to-graphql.js');
+  } else if (sourceProtocol === 'GraphQL' && targetProtocol === 'REST') {
+    templatePath = path.join(__dirname, '../templates/graphql-to-rest.js');
   }
+  
+  // Load template if it exists
+  if (templatePath && fs.existsSync(templatePath)) {
+    let template = fs.readFileSync(templatePath, 'utf-8');
+    
+    // Customize template with user config
+    template = this.customizeTemplate(template, config);
+    
+    return template;
+  }
+  
+  // Fallback: Generate basic adapter structure
+  return this.generateFallbackAdapter(sourceProtocol, targetProtocol, config);
+}
   
   // Customize template with user-specific config
   private customizeTemplate(template: string, config: any): string {
