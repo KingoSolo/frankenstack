@@ -7,7 +7,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { restToGraphQLAdapter } = require('../adapters/restToGraphQLAdapter');
+const { restToGraphQLAdapter } = require('../templates/rest-to-graphql');
 
 /**
  * POST /webhooks/stripe-to-shopify
@@ -122,7 +122,7 @@ router.post('/shopify-to-stripe', async (req, res) => {
   console.log('Timestamp:', new Date().toISOString());
   
   try {
-    const { graphqlToRestAdapter } = require('../adapters/graphqlToRestAdapter');
+    const { graphqlToRestAdapter } = require('../templates/graphql-to-rest');
 
     // GraphQL query to fetch products
     const graphqlQuery = req.body.query || `
