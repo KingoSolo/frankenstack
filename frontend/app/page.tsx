@@ -1,6 +1,7 @@
 'use client';
 
 import { ProtocolSelector } from '@/components/protocol/ProtocolSelector';
+import { RecentAdaptersList } from '@/components/adapters/RecentAdaptersList';
 
 export default function Home() {
   return (
@@ -20,7 +21,9 @@ export default function Home() {
 
       {/* Protocol Selector */}
       <ProtocolSelector />
-
+      <div className="mt-20 max-w-4xl mx-auto">
+        <RecentAdaptersList />
+      </div>
       {/* Footer */}
       <div className="text-center mt-20 text-gray-500 text-sm">
         <p>⚡ Powered by Frankenstein's lightning ⚡</p>
