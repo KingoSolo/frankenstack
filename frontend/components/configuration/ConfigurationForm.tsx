@@ -7,6 +7,7 @@ import { InputMethodToggle } from './InputMethodToggle';
 import { createAdapter } from '@/lib/api';
 import type { Adapter } from '@/lib/types/adapter';
 import { CodeViewer } from '../code/CodeViewer';
+import { AdapterFlowCanvas } from '../visualization/AdapterFlowCanvas';
 
 export function ConfigurationForm() {
   const {
@@ -86,6 +87,14 @@ export function ConfigurationForm() {
         </p>
       </div>
 
+        <div className="mb-8">
+        <AdapterFlowCanvas 
+          sourceProtocol={selectedProtocols[0]}
+          targetProtocol={selectedProtocols[1]}
+          isGenerating={isGenerating}
+        />
+      </div>
+      
       {/* Input method toggle */}
       <InputMethodToggle />
 
