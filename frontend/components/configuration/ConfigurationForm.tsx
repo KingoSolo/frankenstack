@@ -7,6 +7,7 @@ import { InputMethodToggle } from './InputMethodToggle';
 import { createAdapter } from '@/lib/api';
 import type { Adapter } from '@/lib/types/adapter';
 import { CodeViewer } from '../code/CodeViewer';
+import { playSound } from '@/lib/utils/sounds';
 import { AdapterFlowCanvas } from '../visualization/AdapterFlowCanvas';
 
 export function ConfigurationForm() {
@@ -29,7 +30,7 @@ export function ConfigurationForm() {
   const [generatedAdapter, setGeneratedAdapter] = useState<Adapter | null>(null);
     const handleGenerate = async () => {
     setError(null);
-    
+    playSound('electric'); 
     // Validation
     if (inputMethod === 'natural-language' && description.length < 50) {
         setError('Description must be at least 50 characters');
@@ -53,7 +54,7 @@ export function ConfigurationForm() {
     try {
         // Call backend API
         const adapter = await createAdapter(config);
-        console.log('Adapter created:', adapter);
+         playSound('thunder');
         
         setGeneratedAdapter(adapter);
         
@@ -94,7 +95,7 @@ export function ConfigurationForm() {
           isGenerating={isGenerating}
         />
       </div>
-      
+
       {/* Input method toggle */}
       <InputMethodToggle />
 
