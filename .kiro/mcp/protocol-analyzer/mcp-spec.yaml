@@ -1,0 +1,184 @@
+# MCP Server: Protocol Analyzer
+# Extends Kiro with protocol-specific intelligence
+
+mcp:
+  name: "Protocol Analyzer"
+  version: "1.0.0"
+  description: |
+    MCP server that helps Kiro understand and analyze API protocols.
+    Provides tools for parsing OpenAPI specs, GraphQL schemas, and
+    protocol-specific validation.
+
+capabilities:
+  - "Parse REST API documentation (OpenAPI/Swagger)"
+  - "Analyze GraphQL schemas and queries"
+  - "Validate protocol-specific payloads"
+  - "Suggest field mappings between protocols"
+  - "Generate test data for protocols"
+
+tools:
+  - name: "analyze_rest_api"
+    description: "Parse and analyze a REST API specification"
+    parameters:
+      - name: "spec_url"
+        type: "string"
+        description: "URL to OpenAPI/Swagger spec (JSON or YAML)"
+        required: true
+      
+      - name: "endpoint_filter"
+        type: "string"
+        description: "Filter endpoints by path pattern (e.g., /webhooks/*)"
+        required: false
+    
+    returns:
+      type: "object"
+      properties:
+        endpoints:
+          type: "array"
+          description: "List of API endpoints with methods and schemas"
+        authentication:
+          type: "object"
+          description: "Auth requirements (API key, OAuth, etc.)"
+        rate_limits:
+          type: "object"
+          description: "Rate limiting information if available"
+    
+    example_usage: |
+      // In Kiro, when generating REST adapter:
+      const analysis = await mcp.analyze_rest_api({
+        spec_url: "https://api.stripe.com/v1/openapi.yaml",
+        endpoint_filter: "/webhooks"
+      });
+      
+      // Use analysis.endpoints to generate accurate field mappings
+      
+  - name: "analyze_graphql_schema"
+    description: "Parse and analyze a GraphQL schema"
+    parameters:
+      - name: "endpoint"
+        type: "string"
+        description: "GraphQL endpoint URL"
+        required: true
+      
+      - name: "introspection_query"
+        type: "boolean"
+        description: "Use introspection to fetch schema"
+        default: true
+    
+    returns:
+      type: "object"
+      properties:
+        types:
+          type: "array"
+          description: "GraphQL types (Query, Mutation, custom types)"
+        queries:
+          type: "array"
+          description: "Available queries with parameters"
+        mutations:
+          type: "array"
+          description: "Available mutations with parameters"
+    
+    example_usage: |
+      const schema = await mcp.analyze_graphql_schema({
+        endpoint: "https://shopify.com/api/graphql"
+      });
+      
+      // Use schema.mutations to suggest correct mutation syntax
+
+  - name: "suggest_field_mapping"
+    description: "AI-powered field mapping suggestions"
+    parameters:
+      - name: "source_schema"
+        type: "object"
+        description: "Source protocol data structure"
+        required: true
+      
+      - name: "target_schema"
+        type: "object"
+        description: "Target protocol data structure"
+        required: true
+      
+      - name: "context"
+        type: "string"
+        description: "Natural language context from user"
+        required: false
+    
+    returns:
+      type: "object"
+      properties:
+        mappings:
+          type: "object"
+          description: "Suggested source→target field mappings"
+        confidence:
+          type: "number"
+          description: "Confidence score (0-1)"
+        reasoning:
+          type: "string"
+          description: "Explanation of mapping choices"
+    
+    example_usage: |
+      const suggestions = await mcp.suggest_field_mapping({
+        source_schema: stripeWebhookSchema,
+        target_schema: shopifyGraphQLSchema,
+        context: "Map payment data to order creation"
+      });
+
+  - name: "validate_payload"
+    description: "Validate data against protocol schema"
+    parameters:
+      - name: "protocol"
+        type: "string"
+        enum: ["REST", "GraphQL", "gRPC", "SOAP", "WebSocket"]
+        required: true
+      
+      - name: "payload"
+        type: "object"
+        description: "Data to validate"
+        required: true
+      
+      - name: "schema"
+        type: "object"
+        description: "Schema definition"
+        required: true
+    
+    returns:
+      type: "object"
+      properties:
+        valid:
+          type: "boolean"
+        errors:
+          type: "array"
+          description: "Validation errors if any"
+        suggestions:
+          type: "array"
+          description: "How to fix errors"
+
+integration_with_kiro:
+  how_it_works: |
+    1. User starts generating an adapter in FrankenStack
+    2. Kiro detects protocol types (e.g., REST → GraphQL)
+    3. Kiro calls Protocol Analyzer MCP to fetch schemas
+    4. MCP analyzes both APIs and suggests field mappings
+    5. Kiro uses suggestions to generate accurate adapter code
+    6. Result: Better adapters with less manual configuration
+  
+  benefits:
+    - "Reduces user input required"
+    - "Catches schema mismatches early"
+    - "Generates more accurate field mappings"
+    - "Validates generated code before saving"
+
+implementation_notes:
+  language: "TypeScript"
+  dependencies:
+    - "openapi-parser: Parse OpenAPI specs"
+    - "graphql: Parse GraphQL schemas"
+    - "@modelcontextprotocol/sdk: MCP server framework"
+  
+  future_enhancements:
+    - "Real-time schema updates via WebSocket"
+    - "Support for gRPC .proto files"
+    - "SOAP WSDL parsing"
+    - "Auto-generate test cases from schemas"
+
+status: "Specification complete - implementation in progress"
