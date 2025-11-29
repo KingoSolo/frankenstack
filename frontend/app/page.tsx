@@ -2,8 +2,20 @@
 
 import { ProtocolSelector } from '@/components/protocol/ProtocolSelector';
 import { RecentAdaptersList } from '@/components/adapters/RecentAdaptersList';
+import { initAudio } from '@/lib/utils/sounds';
+import { useEffect } from 'react';
 
 export default function Home() {
+  useEffect(() => {
+    // Initialize audio on first user click
+    const handleClick = () => {
+      initAudio();
+      document.removeEventListener('click', handleClick);
+    };
+    document.addEventListener('click', handleClick);
+    
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
   return (
     <div className="min-h-screen bg-[#0a2f1f] py-12 px-4">
       {/* Header */}
