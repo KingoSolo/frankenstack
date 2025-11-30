@@ -27,10 +27,12 @@ export function ConfigurationForm() {
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
   const [generatedAdapter, setGeneratedAdapter] = useState<Adapter | null>(null);
     const handleGenerate = async () => {
     setError(null);
     playSound('electric'); 
+       
     // Validation
     if (inputMethod === 'natural-language' && description.length < 50) {
         setError('Description must be at least 50 characters');
@@ -50,18 +52,34 @@ export function ConfigurationForm() {
     }
 
     setIsGenerating(true);
+    setProgress(0);
+
+    const progressInterval = setInterval(() => {
+    setProgress(prev => {
+      if (prev >= 90) {
+        clearInterval(progressInterval);
+        return 90;
+        }
+        return prev + 10;
+        });
+    }, 200);
 
     try {
         // Call backend API
         const adapter = await createAdapter(config);
-         playSound('thunder');
+         setProgress(100);
+        clearInterval(progressInterval);
         
+        playSound('thunder');
         setGeneratedAdapter(adapter);
         
         // Success message
-        alert(`✅ Adapter saved to database!\n\nID: ${adapter.id}\nProtocols: ${adapter.sourceProtocol} → ${adapter.targetProtocol}`);
+       setTimeout(() => {
+      setProgress(0);
+    }, 1000);
     } catch (err) {
-        console.error('Error:', err);
+        clearInterval(progressInterval);
+        setProgress(0);
         setError('Failed to generate adapter. Make sure backend is running!');
     } finally {
         setIsGenerating(false);
@@ -191,20 +209,49 @@ export function ConfigurationForm() {
           whileHover={isValid && !isGenerating ? { scale: 1.02 } : {}}
           whileTap={isValid && !isGenerating ? { scale: 0.98 } : {}}
         >
+            {isGenerating && (
+            <motion.div 
+                className="mb-4 bg-gray-800 rounded-full h-2 overflow-hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                 >
+                <motion.div
+                className="h-full bg-linear-to-r from-[#39ff14] to-[#7cfc00]"
+                initial={{ width: '0%' }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.3 }}
+                />
+            </motion.div>
+            )}
+
           {isGenerating ? (
-            <span className="flex items-center justify-center gap-2">
+            <span className="flex items-center justify-center gap-3">
               <motion.span
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                animate={{ 
+                  rotate: 360,
+                  scale: [1, 1.2, 1]
+                }}
+                transition={{ 
+                  rotate: { duration: 1, repeat: Infinity, ease: "linear" },
+                  scale: { duration: 0.5, repeat: Infinity }
+                }}
+                className="text-2xl"
               >
                 ⚡
-              </motion.span>
-              Generating Adapter...
-            </span>
-          ) : (
-            'Generate Adapter ⚡'
+                </motion.span>
+                <span>Generating with Kiro...</span>
+                <motion.span
+                    animate={{ opacity: [0, 1, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                    className="text-sm"
+                >
+                    (AI at work)
+                </motion.span>
+                </span>
+            ) : (
+                <>Generate Adapter ⚡</>
           )}
-        </motion.button>
+         </motion.button>
       </div>
       {/* Show generated code */}
       {generatedAdapter && (

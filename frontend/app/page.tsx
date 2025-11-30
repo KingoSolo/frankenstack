@@ -4,6 +4,7 @@ import { ProtocolSelector } from '@/components/protocol/ProtocolSelector';
 import { RecentAdaptersList } from '@/components/adapters/RecentAdaptersList';
 import { initAudio } from '@/lib/utils/sounds';
 import { useEffect } from 'react';
+import { KiroBadge } from '@/components/ui/KiroBadge';
 
 export default function Home() {
   useEffect(() => {
@@ -19,16 +20,19 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#0a2f1f] py-12 px-4">
       {/* Header */}
-      <div className="text-center mb-16">
+    <div className="text-center mb-16">
         <h1 className="text-7xl font-bold text-[#39ff14] mb-4 drop-shadow-[0_0_30px_rgba(57,255,20,0.7)]">
           FrankenStack ⚡
         </h1>
-        <p className="text-2xl text-gray-300">
+        <p className="text-2xl text-gray-300 mb-2">
           Stitch incompatible APIs together with AI
         </p>
-        <p className="text-gray-400 mt-2">
-          Built with Kiro for Kiroween Hackathon 🎃
-        </p>
+        <div className="flex items-center justify-center gap-4 mt-4">
+          <p className="text-gray-400">
+            Built with Kiro for Kiroween Hackathon 🎃
+          </p>
+          <KiroBadge />
+        </div>
       </div>
 
       {/* Protocol Selector */}
