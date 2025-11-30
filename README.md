@@ -20,3 +20,108 @@ Frankenstack is an AI-driven system that generates fully functional protocol ada
 
 *(Add your GIF or screen recording here)*
 
+
+---
+
+## 🧱 Tech Stack
+
+### Frontend
+- Next.js  
+- React  
+- TailwindCSS  
+- ShadCN  
+- Framer Motion  
+- Sonner  
+
+### Backend
+- Node.js / Express  
+- TypeScript  
+- Drizzle ORM + SQLite  
+- OpenAI API  
+
+---
+
+## 📁 Project Structure
+
+frankenstack/
+│
+├── frontend/
+│ ├── app/
+│ ├── components/
+│ ├── lib/
+│ └── public/
+│
+└── backend/
+├── src/
+│ ├── adapters/
+│ ├── routes/
+│ ├── services/
+│ └── db/
+└── drizzle/
+
+---
+
+## 🚀 Getting Started
+
+### Backend
+```bash
+cd backend
+npm install
+npm run dev
+```
+### Frontend
+```
+cd frontend
+npm install
+npm run dev
+```
+
+🌱 Environment Variables
+
+Create a .env file inside /backend:
+
+OPENAI_API_KEY=your_key_here
+DATABASE_URL=sqlite.db
+
+🧠 How It Works
+
+Select source + target protocol
+
+Provide a short description of the adapter
+
+Hit Generate Adapter
+
+AI produces the adapter code
+
+Adapter is saved + shown in your "Recently Generated" list
+
+Flow Canvas visualizes the adapter pipeline
+
+🗺 Roadmap
+
+More protocol adapters (SOAP, gRPC, Webhooks)
+
+Multi-step workflows
+
+Template editor
+
+Adapter marketplace
+
+Fine-tuned AI model
+
+🤝 Contributing
+
+PRs welcome! The system is built to be easily extendable.
+New protocol? Just add:
+
+a spec file
+
+a template file
+
+a generator service
+
+📜 License
+
+MIT License
+
+
