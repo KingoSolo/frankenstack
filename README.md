@@ -16,13 +16,6 @@ Frankenstack is an AI-driven system that generates fully functional protocol ada
 
 ---
 
-## 🎥 Demo
-
-*(Add your GIF or screen recording here)*
-
-
----
-
 ## 🧱 Tech Stack
 
 ### Frontend
