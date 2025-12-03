@@ -1,8 +1,4 @@
 // backend/src/services/KiroService.ts
-import * as fs from 'fs';
-import * as path from 'path';
-
-// backend/src/services/KiroService.ts
 export class KiroService {
   async generateAdapterCode(
     sourceProtocol: string,
@@ -12,22 +8,14 @@ export class KiroService {
     targetEndpoint?: string,
     examplePayload?: string
   ): Promise<string> {
-    console.log(`🧪 Generating ${sourceProtocol} → ${targetProtocol} adapter...`);
-
-    await new Promise(r => setTimeout(r, 300));
-
     const fnName = `${this.toPascal(sourceProtocol)}To${this.toPascal(targetProtocol)}Adapter`;
     const payloadVar = this.randomString(6);
 
-    const safeDescription = userDescription
-      ? userDescription.replace(/\*\//g, '')
-      : 'No description provided.';
-
-    // prettier code formatting with markdown-style highlights for the UI
+    // Build code dynamically
     const code = `
 /* ==========================================================
   ${sourceProtocol} → ${targetProtocol} Adapter
-  Description: ${safeDescription}
+  Description: ${userDescription || "N/A"}
   Generated: ${new Date().toISOString()}
 ========================================================== */
 
@@ -41,8 +29,8 @@ export async function ${fnName}(payload, config) {
     // --------------------------
     // Step 2: Handle endpoints
     // --------------------------
-    ${sourceEndpoint ? `console.log("[Adapter] Reading from", config.sourceEndpoint);` : ''}
-    ${targetEndpoint ? `console.log("[Adapter] Sending to", config.targetEndpoint);` : ''}
+    ${sourceEndpoint ? `console.log("Source endpoint:", "${sourceEndpoint}");` : ""}
+    ${targetEndpoint ? `console.log("Target endpoint:", config?.targetEndpoint || "${targetEndpoint}");` : ""}
 
     // --------------------------
     // Step 3: Transform payload
@@ -50,16 +38,16 @@ export async function ${fnName}(payload, config) {
     const transformed = {
       ...${payloadVar},
       meta: {
-        description: \`${safeDescription}\`,
+        description: \`${userDescription}\`,
         from: "${sourceProtocol}",
         to: "${targetProtocol}",
         timestamp: Date.now()
       },
-      example: ${examplePayload ? examplePayload : 'null'}
+      example: ${examplePayload ? examplePayload : "null"}
     };
 
     // --------------------------
-    // Step 4: Return
+    // Step 4: Return transformed data
     // --------------------------
     return { success: true, data: transformed };
 
@@ -69,10 +57,10 @@ export async function ${fnName}(payload, config) {
 }
 
 /* --------------------------
-  Example usage in your app
+  Example usage
 --------------------------
 const result = await ${fnName}(
-  { event: "payment_succeeded" },
+  { event: "example_event" },
   { targetEndpoint: "${targetEndpoint || 'https://your-api.com'}" }
 );
 */
