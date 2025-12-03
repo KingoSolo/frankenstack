@@ -7,8 +7,9 @@ import { InputMethodToggle } from './InputMethodToggle';
 import { createAdapter } from '@/lib/api';
 import type { Adapter } from '@/lib/types/adapter';
 import { CodeViewer } from '../code/CodeViewer';
+import { toast } from 'sonner';
 import { playSound } from '@/lib/utils/sounds';
-import { AdapterFlowCanvas } from '../visualization/AdapterFlowCanvas';
+import AdapterFlowCanvas from '../visualization/AdapterFlowCanvas';
 
 export function ConfigurationForm() {
   const {
@@ -64,26 +65,34 @@ export function ConfigurationForm() {
         });
     }, 200);
 
-    try {
-        // Call backend API
+   try {
         const adapter = await createAdapter(config);
-         setProgress(100);
+        setProgress(100);
         clearInterval(progressInterval);
-        
+
         playSound('thunder');
         setGeneratedAdapter(adapter);
-        
-        // Success message
-       setTimeout(() => {
-      setProgress(0);
-    }, 1000);
-    } catch (err) {
+
+        toast.success(
+            `Adapter generated successfully!  
+        ${adapter.sourceProtocol} → ${adapter.targetProtocol}`,
+            {
+            duration: 4000,
+            className: "border border-[#39ff14] bg-[#0a2f1f] text-[#39ff14]"
+            }
+        );
+
+        setTimeout(() => {
+            setProgress(0);
+        }, 1000);
+
+        } catch (err) {
         clearInterval(progressInterval);
         setProgress(0);
         setError('Failed to generate adapter. Make sure backend is running!');
-    } finally {
+        } finally {
         setIsGenerating(false);
-    }
+        }
     };
 
   const isValid = inputMethod === 'natural-language' 
@@ -109,8 +118,9 @@ export function ConfigurationForm() {
         <div className="mb-8">
         <AdapterFlowCanvas 
           sourceProtocol={selectedProtocols[0]}
-          targetProtocol={selectedProtocols[1]}
-          isGenerating={isGenerating}
+         targetProtocol={selectedProtocols[1]}
+         isGenerating={isGenerating}
+         generatedCode={generatedAdapter?.code || null}
         />
       </div>
 
