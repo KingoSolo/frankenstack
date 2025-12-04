@@ -11,7 +11,14 @@ const PORT = 3001;
 const adapterService = new AdapterService();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'https://frankenstack-frontend.vercel.app', // ADD THIS
+    'https://*.vercel.app' // Allow all Vercel preview deployments
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 // Health check
