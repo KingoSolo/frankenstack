@@ -1,82 +1,73 @@
-// backend/src/services/KiroService.ts
-export class KiroService {
-  async generateAdapterCode(
-    sourceProtocol: string,
-    targetProtocol: string,
-    userDescription: string,
-    sourceEndpoint?: string,
-    targetEndpoint?: string,
-    examplePayload?: string
-  ): Promise<string> {
-    const fnName = `${this.toPascal(sourceProtocol)}To${this.toPascal(targetProtocol)}Adapter`;
-    const payloadVar = this.randomString(6);
+import { detectIntent, intentBlocks, IntentType } from "./smartIntentEngine";
 
-    // Build code dynamically
-    const code = `
+export class KiroService {
+  generateAdapterCode(description: string, payload: any) {
+    // 1. Detect intent safely
+    const intent: IntentType = detectIntent(description);
+
+    // 2. Get correct code block
+    const block = intentBlocks[intent];
+
+    // 3. Build fully dynamic, descriptive adapter code
+    return `
 /* ==========================================================
-  ${sourceProtocol} → ${targetProtocol} Adapter
-  Description: ${userDescription || "N/A"}
+  Dynamic Adapter
+  Description: ${description}
+  Detected Intent: ${intent}
   Generated: ${new Date().toISOString()}
 ========================================================== */
 
-export async function ${fnName}(payload, config) {
+export async function DynamicAdapter(payload, config) {
   try {
-    // --------------------------
-    // Step 1: Capture payload
-    // --------------------------
-    const ${payloadVar} = payload;
+    console.log("[DynamicAdapter] Starting transformation...");
 
     // --------------------------
-    // Step 2: Handle endpoints
+    // Intent Block (Auto-Generated)
     // --------------------------
-    ${sourceEndpoint ? `console.log("Source endpoint:", "${sourceEndpoint}");` : ""}
-    ${targetEndpoint ? `console.log("Target endpoint:", config?.targetEndpoint || "${targetEndpoint}");` : ""}
+    ${block}
 
     // --------------------------
-    // Step 3: Transform payload
+    // Validate targetEndpoint
     // --------------------------
-    const transformed = {
-      ...${payloadVar},
+    if (!config?.targetEndpoint) throw new Error("Missing targetEndpoint in config");
+
+    // --------------------------
+    // Send data to endpoint
+    // --------------------------
+    const response = await fetch(config.targetEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    return {
+      success: true,
+      data: await response.json(),
       meta: {
-        description: \`${userDescription}\`,
-        from: "${sourceProtocol}",
-        to: "${targetProtocol}",
+        description: "${description}",
+        detectedIntent: "${intent}",
         timestamp: Date.now()
-      },
-      example: ${examplePayload ? examplePayload : "null"}
+      }
     };
 
-    // --------------------------
-    // Step 4: Return transformed data
-    // --------------------------
-    return { success: true, data: transformed };
-
   } catch (err) {
-    return { success: false, error: err.message, meta: { timestamp: Date.now() } };
+    console.error("[DynamicAdapter] Error:", err.message);
+    return {
+      success: false,
+      error: err.message,
+      meta: { timestamp: Date.now() }
+    };
   }
 }
 
 /* --------------------------
-  Example usage
+Example usage
 --------------------------
-const result = await ${fnName}(
-  { event: "example_event" },
-  { targetEndpoint: "${targetEndpoint || 'https://your-api.com'}" }
+const result = await DynamicAdapter(
+  { amount: 5000, customer: "Solomon", orderId: "123ABC" },
+  { targetEndpoint: "https://your-api.com" }
 );
 */
 `;
-
-    return code.trim();
-  }
-
-  private randomString(len: number) {
-    const chars = 'abcdefghijklmnopqrstuvwxyz';
-    let s = '';
-    for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)];
-    return s;
-  }
-
-  private toPascal(str: string) {
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   }
 }

@@ -25,14 +25,18 @@ app.get('/api/health', (req, res) => {
 // Create adapter (for testing - we'll use tRPC later)
 app.post('/api/adapters', async (req, res) => {
   try {
-    const { sourceProtocol, targetProtocol, code, config } = req.body;
-    
+    const { sourceProtocol, targetProtocol, description, payload, targetEndpoint,config } = req.body;
+
+if (!config?.description) {
+  config.description = "Generic adapter"; // fallback description
+}
     const adapter = await adapterService.createAdapter({
       userId: 'demo-user',
       sourceProtocol,
       targetProtocol,
-      code,
-      config
+      description,
+      payload,
+      targetEndpoint
     });
 
     res.json({ success: true, adapter });
@@ -41,6 +45,7 @@ app.post('/api/adapters', async (req, res) => {
     res.status(500).json({ success: false, error: 'Failed to create adapter' });
   }
 });
+
 
 // List adapters
 app.get('/api/adapters', async (req, res) => {

@@ -1,0 +1,36 @@
+adapter:
+  name: "SOAP Adapter"
+  protocols: ["SOAP to REST", "REST to SOAP"]
+  version: "1.0.0"
+
+purpose: |
+  Handle legacy XML-based SOAP services.
+  Transform between SOAP envelopes and modern REST/GraphQL.
+
+input:
+  format: "XML SOAP Envelope"
+  characteristics:
+    - "WS-* standards support"
+    - "WSDL schema validation"
+    - "SOAP 1.1 and 1.2"
+
+output:
+  format: "XML or JSON"
+  characteristics:
+    - "SOAP fault handling"
+    - "XML namespaces"
+
+code_structure:
+  required_components:
+    - "XML parser"
+    - "SOAP envelope builder"
+    - "WSDL operations"
+    - "Fault handling"
+
+generation_instructions:
+  for_kiro: |
+    Generate SOAP adapter with:
+    1. XML SOAP envelope construction
+    2. WSDL operation mapping
+    3. SOAP fault error handling
+    4. Namespace management

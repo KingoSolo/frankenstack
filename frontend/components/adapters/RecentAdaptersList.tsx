@@ -77,8 +77,9 @@ export function RecentAdaptersList() {
               </div>
               
               <div className="text-sm text-gray-500">
-                {adapter.code.split('\n').length} lines
+                {adapter.code?.split('\n').length ?? 'No code yet'}
               </div>
+
             </div>
           </motion.div>
         );

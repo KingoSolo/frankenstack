@@ -1,0 +1,36 @@
+adapter:
+  name: "gRPC Adapter"
+  protocols: ["gRPC to REST", "REST to gRPC"]
+  version: "1.0.0"
+
+purpose: |
+  Handle high-performance RPC calls using Protocol Buffers.
+  Transform between gRPC binary format and REST/GraphQL.
+
+input:
+  format: "Protocol Buffers (binary)"
+  characteristics:
+    - "Strongly typed messages"
+    - "Bidirectional streaming"
+    - "HTTP/2 transport"
+
+output:
+  format: "JSON or Protocol Buffers"
+  characteristics:
+    - "Serialized binary data"
+    - "Compressed payloads"
+
+code_structure:
+  required_components:
+    - "Proto file parser"
+    - "Message serialization"
+    - "Stream handling"
+    - "Error codes mapping"
+
+generation_instructions:
+  for_kiro: |
+    Generate gRPC adapter with:
+    1. Binary protocol buffer handling
+    2. Stream processing capabilities
+    3. HTTP/2 connection management
+    4. Error code translation (gRPC codes to HTTP status)

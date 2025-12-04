@@ -1,0 +1,36 @@
+adapter:
+  name: "WebSocket Adapter"
+  protocols: ["WebSocket to REST", "REST to WebSocket"]
+  version: "1.0.0"
+
+purpose: |
+  Handle real-time bidirectional communication.
+  Transform between persistent WebSocket connections and HTTP.
+
+input:
+  format: "WebSocket frames"
+  characteristics:
+    - "Persistent connections"
+    - "Real-time events"
+    - "Bidirectional messaging"
+
+output:
+  format: "JSON messages"
+  characteristics:
+    - "Event-driven"
+    - "Push notifications"
+
+code_structure:
+  required_components:
+    - "WebSocket client/server"
+    - "Connection pool management"
+    - "Heartbeat/ping-pong"
+    - "Reconnection logic"
+
+generation_instructions:
+  for_kiro: |
+    Generate WebSocket adapter with:
+    1. Persistent connection handling
+    2. Event subscription/publishing
+    3. Reconnection with backoff
+    4. Message queueing
