@@ -115,6 +115,8 @@ a generator service
 
 📜 License
 
-MIT License
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Kiroween 2024](https://img.shields.io/badge/Hackathon-Kiroween%202024-purple)](https://kiroween.devpost.com)
+
 
 
