@@ -1,6 +1,6 @@
 import type { AdapterConfig, Adapter } from './types/adapter';
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = 'https://frankenstack.onrender.com/api';
 
 export async function fetchBackendHealth() {
   const response = await fetch(`${API_URL}/health`);
