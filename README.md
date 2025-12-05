@@ -178,8 +178,8 @@ MIT License -
 
 ## 👤 Author
 
-**[Your Name]**
-- GitHub: [@yourusername](https://github.com/yourusername)
+**[Solomon Adeniran]**
+- GitHub: [@KingoSolo](https://github.com/KingoSolo)
 - Devpost: [Your Devpost Profile](https://devpost.com/yourusername)
 
 ---
@@ -187,7 +187,7 @@ MIT License -
 ## 🙏 Acknowledgments
 
 - Built with [Kiro IDE](https://kiro.dev)
-- Hackathon: [Kiroween 2024](https://kiroween.devpost.com)
+- Hackathon: [Kiroween 2025](https://kiroween.devpost.com)
 - Inspired by the pain of API integration hell
 
 ---
